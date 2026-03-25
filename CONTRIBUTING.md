@@ -35,7 +35,23 @@ cd Open-Source-Development-Assignment
 
 ---
 
-### 2. Setup the Development Environment (Windows)
+### 2. Create a Feature Branch
+
+Always create a new branch for your work.
+
+Example:
+
+git checkout -b feature/ticket-system
+
+Branch naming convention:
+
+feature/feature-name
+bugfix/issue-name
+docs/documentation-update
+
+---
+
+### 3. Setup the Development Environment (Windows)
 
 Create a virtual environment:
 
@@ -51,7 +67,7 @@ pip install -r requirements.txt
 
 ---
 
-### 3. Run the Application
+### 4. Run the Application
 
 Start the development server:
 
@@ -61,7 +77,7 @@ The application should now be running locally.
 
 ---
 
-### 4. Making Changes
+### 5. Making Changes
 
 When contributing code, please:
 
@@ -72,7 +88,7 @@ When contributing code, please:
 
 ---
 
-### 5. Committing Changes
+### 6. Committing Changes
 
 Use clear and descriptive commit messages.
 
@@ -81,6 +97,20 @@ Example:
 Add ticket creation functionality
 
 Try to keep commits focused on a single change or improvement.
+
+---
+
+### 7. Push and Create a Pull Request
+
+Push your branch to GitHub:
+
+git push origin feature/ticket-system
+
+Then open a Pull Request and describe:
+
+* What the change does
+* Why it is needed
+* Any related issues
 
 ---
 
