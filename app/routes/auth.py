@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models.user import User, Role
 from .. import db
@@ -11,8 +11,11 @@ _EMAIL_RE     = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _MIN_PASS_LEN = 0
 
 
-@auth_bp.post("/register")
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "GET":
+        return render_template("register.html", roles=Role.ALL)
+    
     data     = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()
     email    = (data.get("email")    or "").strip().lower()
@@ -40,8 +43,10 @@ def register():
     return jsonify({"message": "Registration successful.", "user": user.to_dict()}), 201
 
 
-@auth_bp.post("/login")
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "GET":
+        return render_template("login.html")
     data       = request.get_json(silent=True) or {}
     identifier = (data.get("username") or data.get("email") or "").strip().lower()
     password   = data.get("password") or ""
