@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  background:#06060a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+/* ── layout ── */
+.wrap{
+  width:600px;
+  max-width:100%;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 40px 100px rgba(0,0,0,.6);
+  background:#0d0d14;
+}
+
+/* ── form area ── */
+.left{
+  padding:48px 48px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+.left::before{
+  content:'';
+  position:absolute;top:-140px;right:-100px;
+  width:380px;height:380px;
+  background:radial-gradient(circle,rgba(99,102,241,.14) 0%,transparent 70%);
+  pointer-events:none;
+}
+.left::after{
+  content:'';
+  position:absolute;bottom:-100px;left:-60px;
+  width:260px;height:260px;
+  background:radial-gradient(circle,rgba(99,102,241,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* brand */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}
+.logo{
+  width:34px;height:34px;
+  background:#6366f1;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.logo svg{width:18px;height:18px}
+.brand-name{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;font-size:1.2rem;
+  color:#fff;letter-spacing:.04em;
+}
+
+h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.5rem;font-weight:500;
+  color:#fff;line-height:1.1;margin-bottom:8px;
+}
+.sub{color:#4b5280;font-size:.9rem;margin-bottom:26px}
+
+/* alert */
+.alert{
+  border-radius:10px;padding:11px 15px;
+  font-size:.85rem;margin-bottom:18px;
+  border-left:3px solid;display:none;
+}
+.alert.error  {background:rgba(239,68,68,.08);border-color:#ef4444;color:#fca5a5;display:block}
+.alert.success{background:rgba(34,197,94,.08);border-color:#22c55e;color:#86efac;display:block}
+
+/* grid */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* fields */
+.field{margin-bottom:16px}
+.field label{
+  display:block;
+  font-size:.72rem;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:#3d4270;margin-bottom:8px;
+}
+.field input{
+  width:100%;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:12px 15px;
+  font-size:.92rem;
+  font-family:'Inter',sans-serif;
+  color:#e2e4f0;
+  outline:none;
+  transition:border-color .2s,background .2s;
+}
+.field input:focus{border-color:#6366f1;background:rgba(99,102,241,.06)}
+.field input::placeholder{color:#2a2d45}
+
+/* password */
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.pw-eye{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;
+  color:#3d4270;display:flex;padding:4px;
+  transition:color .2s;
+}
+.pw-eye:hover{color:#818cf8}
+.pw-eye svg{width:17px;height:17px}
+
+/* strength */
+.strength-row{display:flex;gap:4px;margin-top:7px}
+.strength-row span{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.07);transition:.3s}
+.strength-label{font-size:.72rem;color:#3d4270;margin-top:5px;display:block;min-height:16px;transition:color .3s}
+
+/* button */
+.btn{
+  width:100%;padding:13px;margin-top:6px;
+  background:linear-gradient(135deg,#6366f1,#818cf8);
+  color:#fff;border:none;border-radius:10px;
+  font-size:.95rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  cursor:pointer;
+  transition:opacity .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.footer-link{text-align:center;font-size:.83rem;color:#3d4270;margin-top:18px}
+.footer-link a{color:#6366f1;text-decoration:none;font-weight:500}
+.footer-link a:hover{text-decoration:underline}
+
+/* responsive */
+@media(max-width:560px){
+  .left{padding:32px 22px}
+  .row2{grid-template-columns:1fr}
+}

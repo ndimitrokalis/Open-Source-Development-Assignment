@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Account — LibreHelp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}"/>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="left">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 2.29 1.1 4.33 2.79 5.62L7 18h10l-.79-3.38C17.9 13.33 19 11.29 19 9c0-3.87-3.13-7-7-7z" fill="white"/>
+          <rect x="9" y="18" width="6" height="2" rx="1" fill="white"/>
+        </svg>
+      </div>
+      <span class="brand-name">LibreHelp</span>
+    </div>
+
+    <h1>Create account</h1>
+    <p class="sub">Join your team on LibreHelp</p>
+
+    <div id="alert-box" class="alert"></div>
+
+    <form id="register-form" novalidate>
+
+      <div class="row2">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="johndoe" autocomplete="username" required minlength="3"/>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Company</label>
+        <input type="text" id="company" placeholder="Acme Corp (optional)" autocomplete="organization"/>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input
+            type="password" id="password"
+            placeholder="Create a strong password"
+            autocomplete="new-password" required
+            oninput="strengthCheck(this)"
+          />
+          <button type="button" class="pw-eye" onclick="togglePw('password')" aria-label="Toggle password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="strength-row">
+          <span id="s1"></span><span id="s2"></span><span id="s3"></span><span id="s4"></span>
+        </div>
+        <span class="strength-label" id="strength-label"></span>
+      </div>
+
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="confirm" placeholder="Repeat your password" autocomplete="new-password" required/>
+          <button type="button" class="pw-eye" onclick="togglePw('confirm')" aria-label="Toggle confirm password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn" id="submit-btn">
+        <span id="btn-text">Create Account</span>
+        <span class="spinner" id="spinner"></span>
+      </button>
+    </form>
+
+    <p class="footer-link">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+
+</body>
+</html>
