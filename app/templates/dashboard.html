@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+{% endblock %}
+
+
+{% block content %}
+
+{# ── Page header ─────────────────────────────────────────────────────────── #}
+<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <span class="role-chip role-chip-{{ current_user.role }}">
+      {{ current_user.role | capitalize }}
+    </span>
+    <h2 class="fw-bold mb-1">Welcome back, {{ current_user.username }}</h2>
+    <p class="text-muted mb-0">
+      {% if current_user.role == 'customer' %}Here is an overview of your support activity.
+      {% elif current_user.role == 'technician' %}Your assigned tickets and queue overview.
+      {% elif current_user.role == 'manager' %}Team performance and ticket management.
+      {% else %}Full system overview and administration.{% endif %}
+    </p>
+  </div>
+
+</div>
+
+
+{# ── Stat cards ──────────────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+  {# Total tickets — everyone sees this #}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+        <i class="bi bi-ticket-perforated-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ total_tickets }}</div>
+      <div class="stat-label">Total Tickets</div>
+    </div>
+  </div>
+
+  {# Open #}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+        <i class="bi bi-clock-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ open_tickets }}</div>
+      <div class="stat-label">Open</div>
+    </div>
+  </div>
+
+  {# In Progress #}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-info bg-opacity-10 text-info">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <div class="stat-value text-dark">{{ in_progress_tickets }}</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+  </div>
+
+  {# Resolved / Done #}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-success bg-opacity-10 text-success">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ done_tickets }}</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+  </div>
+
+  {# Technician: assigned to me #}
+  {% if current_user.role == 'technician' %}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+        <i class="bi bi-person-check-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ assigned_tickets }}</div>
+      <div class="stat-label">Assigned to Me</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ critical_tickets }}</div>
+      <div class="stat-label">Critical</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Manager / Admin extras #}
+  {% if current_user.role in ['manager', 'admin'] %}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ unassigned_tickets }}</div>
+      <div class="stat-label">Unassigned</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-purple bg-opacity-10" style="background:rgba(108,117,193,.1)">
+        <i class="bi bi-people-fill" style="color:#6c74c1"></i>
+      </div>
+      <div class="stat-value text-dark">{{ active_technicians }}</div>
+      <div class="stat-label">Active Technicians</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Admin: total users #}
+  {% if current_user.role == 'admin' %}
+  <div class="col-6 col-md-3">
+    <div class="lh-stat-card">
+      <div class="stat-icon bg-secondary bg-opacity-10 text-secondary">
+        <i class="bi bi-person-badge-fill"></i>
+      </div>
+      <div class="stat-value text-dark">{{ total_users }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>{# /row stats #}
+
+
+{# ── Category breakdown + Activity ───────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-bottom fw-semibold small text-uppercase text-muted letter-spacing-1">
+        Tickets by Category
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <span class="cat-label text-muted">Service</span>
+          <div class="cat-bar-wrap">
+            <div class="cat-bar bg-primary" style="width: {{ service_pct }}%"></div>
+          </div>
+          <span class="cat-count">{{ service_count }}</span>
+        </div>
+        <div class="d-flex align-items-center mb-3">
+          <span class="cat-label text-muted">Bug</span>
+          <div class="cat-bar-wrap">
+            <div class="cat-bar bg-warning" style="width: {{ bug_pct }}%"></div>
+          </div>
+          <span class="cat-count">{{ bug_count }}</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <span class="cat-label text-muted">Critical</span>
+          <div class="cat-bar-wrap">
+            <div class="cat-bar bg-danger" style="width: {{ critical_pct }}%"></div>
+          </div>
+          <span class="cat-count">{{ critical_count }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-bottom fw-semibold small text-uppercase text-muted">
+        Recent Activity
+      </div>
+      <div class="card-body">
+        {% for event in recent_activity %}
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <div class="activity-text">{{ event.text }}</div>
+            <div class="activity-time">{{ event.time }}</div>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">No recent activity.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>{# /row categories #}
+
+
+{# ── Ticket table ─────────────────────────────────────────────────────────── #}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+    <span class="fw-semibold">
+      {% if current_user.role == 'customer' %}My Tickets
+      {% else %}All Tickets{% endif %}
+    </span>
+    <div class="d-flex gap-2">
+      <a href="#" class="btn btn-sm btn-outline-secondary">View all</a>
+    </div>
+  </div>
+  <div class="card-body pb-0">
+    <div class="card-search">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Search tickets…" id="ticket-search" oninput="filterTickets()"/>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" id="ticket-table">
+      <thead class="table-light">
+        <tr>
+          <th class="text-muted small fw-semibold" style="width:70px">ID</th>
+          <th class="text-muted small fw-semibold">Title</th>
+          {% if current_user.role != 'customer' %}
+          <th class="text-muted small fw-semibold">Customer</th>
+          {% endif %}
+          {% if current_user.role in ['manager', 'admin'] %}
+          <th class="text-muted small fw-semibold">Assignee</th>
+          {% endif %}
+          <th class="text-muted small fw-semibold">Type</th>
+          <th class="text-muted small fw-semibold">Status</th>
+          <th class="text-muted small fw-semibold">Priority</th>
+          <th class="text-muted small fw-semibold">
+            {% if current_user.role == 'customer' %}Created{% else %}Due{% endif %}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in ticket_list %}
+        <tr onclick="window.location='#'">
+
+          <td class="text-muted small font-monospace">#{{ ticket.id }}</td>
+
+          <td style="max-width:240px">
+            <span class="d-block text-truncate fw-medium">{{ ticket.title }}</span>
+          </td>
+
+          {% if current_user.role != 'customer' %}
+          <td class="text-muted small">{{ ticket.customer_name }}</td>
+          {% endif %}
+
+          {% if current_user.role in ['manager', 'admin'] %}
+          <td>
+            {% if ticket.assignee %}
+            <div class="d-flex align-items-center gap-2">
+              <span class="emp-initials" style="width:24px;height:24px;font-size:.58rem">
+                {{ ticket.assignee.username[:2].upper() }}
+              </span>
+              <span class="small">{{ ticket.assignee.username }}</span>
+            </div>
+            {% else %}
+            <span class="text-muted small">Unassigned</span>
+            {% endif %}
+          </td>
+          {% endif %}
+
+          <td>
+            {% if ticket.type == 'Service' %}
+            <span class="badge bg-primary bg-opacity-10 text-primary">Service</span>
+            {% elif ticket.type == 'Bug' %}
+            <span class="badge bg-warning bg-opacity-10 text-warning">Bug</span>
+            {% else %}
+            <span class="badge bg-danger bg-opacity-10 text-danger">Critical</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if ticket.status == 'Todo' %}
+            <span class="badge bg-secondary bg-opacity-10 text-secondary">Todo</span>
+            {% elif ticket.status == 'In Progress' %}
+            <span class="badge bg-info bg-opacity-10 text-info">In Progress</span>
+            {% else %}
+            <span class="badge bg-success bg-opacity-10 text-success">Done</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if ticket.priority %}
+            <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-arrow-up"></i> High</span>
+            {% else %}
+            <span class="text-muted small">Normal</span>
+            {% endif %}
+          </td>
+
+          <td class="text-muted small">
+            {% if current_user.role == 'customer' %}
+              {{ ticket.created_at.strftime('%d %b %Y') }}
+            {% else %}
+              {{ ticket.done_by.strftime('%d %b') if ticket.done_by else '—' }}
+            {% endif %}
+          </td>
+
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">No tickets found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>{# /ticket table card #}
+
+
+{# ── Employees section — Manager & Admin only ─────────────────────────────── #}
+{% if current_user.role in ['manager', 'admin'] %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white border-bottom fw-semibold">
+    {% if current_user.role == 'admin' %}All Users{% else %}Team Members{% endif %}
+  </div>
+  <div class="card-body">
+    <div class="card-search">
+      <i class="bi bi-search"></i>
+      <input type="text" placeholder="Search employees…" id="emp-search" oninput="filterEmployees()"/>
+    </div>
+    <div id="emp-list">
+      {% for emp in employees %}
+      <div class="emp-row">
+        <div class="emp-initials">{{ emp.username[:2].upper() }}</div>
+        <div class="flex-grow-1">
+          <div class="fw-medium small">{{ emp.username }}</div>
+          <div class="text-muted" style="font-size:.72rem">
+            {{ emp.role | capitalize }}
+            {% if emp.company %} · {{ emp.company }}{% endif %}
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-muted" style="font-size:.75rem">{{ emp.active_tickets }} tickets</span>
+          {% if emp.on_vacation %}
+          <span class="badge bg-warning bg-opacity-10 text-warning">Vacation</span>
+          {% elif emp.active %}
+          <span class="badge bg-success bg-opacity-10 text-success">Active</span>
+          {% else %}
+          <span class="badge bg-secondary bg-opacity-10 text-secondary">Inactive</span>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <p class="text-muted small mb-0">No employees found.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}{# /employees #}
+
+{% endblock %}{# /content #}
+
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
