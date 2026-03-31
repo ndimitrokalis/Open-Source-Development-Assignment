@@ -1,0 +1,117 @@
+/* ── dashboard.css ─────────────────────────────────────────────────────────
+   Scoped styles for dashboard.html — works on top of Bootstrap 5.3
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* stat cards */
+.lh-stat-card {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 20px 22px;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .2s, transform .15s;
+}
+.lh-stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  transform: translateY(-2px);
+}
+.lh-stat-card .stat-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+}
+.lh-stat-card .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.lh-stat-card .stat-label {
+  font-size: .78rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 500;
+}
+
+/* category bar */
+.cat-bar-wrap {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 1;
+  margin: 0 10px;
+}
+.cat-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .5s ease;
+}
+.cat-label { font-size: .82rem; width: 70px; flex-shrink: 0; }
+.cat-count  { font-size: .78rem; color: #6c757d; min-width: 24px; text-align: right; }
+
+/* activity feed */
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #0d6efd; flex-shrink: 0; margin-top: 5px;
+}
+.activity-text { font-size: .82rem; color: #495057; line-height: 1.4; }
+.activity-time { font-size: .72rem; color: #adb5bd; margin-top: 2px; }
+
+/* employee list items */
+.emp-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+.emp-row:last-child { border-bottom: none; }
+.emp-initials {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #0d6efd;
+  color: #fff; font-size: .72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* clickable table rows */
+.table tbody tr { cursor: pointer; }
+.table tbody tr:hover { background-color: #f8f9fa; }
+
+/* role chip next to page title */
+.role-chip {
+  display: inline-block;
+  font-size: .7rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em;
+  padding: 3px 10px; border-radius: 20px;
+  margin-bottom: 6px;
+}
+.role-chip-customer   { background: #e7f1ff; color: #0d6efd; }
+.role-chip-technician { background: #e8f5e9; color: #198754; }
+.role-chip-manager    { background: #fff8e1; color: #fd7e14; }
+.role-chip-admin      { background: #fdecea; color: #dc3545; }
+
+/* search inside card */
+.card-search {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid #dee2e6; border-radius: 8px;
+  padding: 7px 12px; margin-bottom: 14px;
+  background: #fff;
+}
+.card-search i { color: #adb5bd; font-size: .9rem; }
+.card-search input {
+  border: none; outline: none;
+  font-size: .85rem; flex: 1;
+  font-family: inherit; background: transparent;
+}
