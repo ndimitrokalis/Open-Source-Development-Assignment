@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, render_template, redirect, session, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models.user import User, Role
 from .. import db
@@ -10,6 +10,12 @@ auth_bp = Blueprint("auth", __name__)
 _EMAIL_RE     = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _MIN_PASS_LEN = 0
 
+
+@auth_bp.route("/")
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.index"))
+    return redirect(url_for("auth.login"))
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -75,4 +81,5 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return jsonify({"message": "Logged out successfully."}), 200
