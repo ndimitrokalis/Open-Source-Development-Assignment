@@ -14,6 +14,7 @@ def startup():
     login_manager.login_view = "auth.login"
  
     from .models.user import User
+    from .models.ticket import Ticket
  
     @login_manager.user_loader
     def load_user(user_id):
@@ -21,8 +22,11 @@ def startup():
  
     from .routes.auth import auth_bp
     from .routes.dashboard import dashboard_bp
+    from .routes.tickets import tickets_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(tickets_bp)
  
     with app.app_context():
         db.create_all()
