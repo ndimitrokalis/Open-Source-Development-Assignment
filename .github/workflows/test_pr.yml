@@ -29,12 +29,12 @@ jobs:
           FLASK_ENV: testing
           SECRET_KEY: secrecy-tester
         run: |
-            export FLASK_APP="app:startup"
-            flask run --host=127.0.0.1 --port=5000 &
-            sleep 5
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/)
+            $env:FLASK_APP="app:startup"
+            Start-Process python -ArgumentList "-m flask run --host=127.0.0.1 --port=5000" -NoNewWindow
+            Start-Sleep -Seconds 5
+            $STATUS = curl -s -o $null -w "%{http_code}" http://127.0.0.1:5000/
             echo "HTTP status code: $STATUS"
-            if [[ "$STATUS" -lt 200 || "$STATUS" -ge 400 ]]; then
+            if ($STATUS -lt 200 -or $STATUS -ge 400) {
                 echo "Flask app did not respond correctly"
                 exit 1
-            fi
+            }
