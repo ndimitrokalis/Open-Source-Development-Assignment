@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, render_template, redirect, session, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models.user import User, Role
 from .. import db
@@ -11,6 +11,12 @@ _EMAIL_RE     = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _MIN_PASS_LEN = 0
 
 
+@auth_bp.route("/")
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.index"))
+    return redirect(url_for("auth.login"))
+
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
@@ -19,6 +25,7 @@ def register():
     data     = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()
     email    = (data.get("email")    or "").strip().lower()
+    company  = (data.get("company")  or "").strip()
     password = data.get("password") or ""
     role     = (data.get("role")    or Role.USER).strip().lower()
 
@@ -35,7 +42,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered."}), 409
 
-    user = User(username=username, email=email, role=role)
+    user = User(username=username, email=email, company=company, role=role)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
@@ -64,7 +71,7 @@ def login():
     if not user.is_active:
         return jsonify({"error": "Account disabled. Contact an administrator."}), 403
 
-    user.last_login = datetime.now(timezone.utc)
+    #user.last_login = datetime.now(timezone.utc) #Disabled during testing to avoid merge conflicts with other branches
     db.session.commit()
     login_user(user, remember=remember)
 
@@ -75,4 +82,5 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return jsonify({"message": "Logged out successfully."}), 200
