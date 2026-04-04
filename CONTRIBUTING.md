@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 Start the development server:
 
-python run.py
+flask run
 
 The application should now be running locally.
 
