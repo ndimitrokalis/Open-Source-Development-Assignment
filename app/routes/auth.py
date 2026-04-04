@@ -25,6 +25,7 @@ def register():
     data     = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()
     email    = (data.get("email")    or "").strip().lower()
+    company  = (data.get("company")  or "").strip()
     password = data.get("password") or ""
     role     = (data.get("role")    or Role.USER).strip().lower()
 
@@ -41,7 +42,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered."}), 409
 
-    user = User(username=username, email=email, role=role)
+    user = User(username=username, email=email, company=company, role=role)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
