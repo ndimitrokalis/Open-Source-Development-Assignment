@@ -20,14 +20,13 @@ def index():
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return render_template("register.html", roles=Role.ALL)
+        return render_template("register.html")
     
     data     = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()
     email    = (data.get("email")    or "").strip().lower()
     company  = (data.get("company")  or "").strip()
     password = data.get("password") or ""
-    role     = (data.get("role")    or Role.USER).strip().lower()
 
     if len(username) < 3:
         return jsonify({"error": "Username must be at least 3 characters."}), 400
@@ -35,14 +34,12 @@ def register():
         return jsonify({"error": "Invalid email address."}), 400
     if len(password) < _MIN_PASS_LEN:
         return jsonify({"error": f"Password must be at least {_MIN_PASS_LEN} characters."}), 400
-    if not Role.is_valid(role):
-        return jsonify({"error": f"Role must be one of: {', '.join(Role.ALL)}."}), 400
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already taken."}), 409
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered."}), 409
 
-    user = User(username=username, email=email, company=company, role=role)
+    user = User(username=username, email=email, company=company)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
@@ -83,4 +80,4 @@ def login():
 def logout():
     logout_user()
     session.clear()
-    return jsonify({"message": "Logged out successfully."}), 200
+    return redirect(url_for("auth.login"))
