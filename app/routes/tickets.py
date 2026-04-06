@@ -8,7 +8,7 @@ CSS-26  POST      — mark ticket as Done
 """
  
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, render_template, abort
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
  
 from .. import db
@@ -40,29 +40,6 @@ def _get_ticket_or_404(ticket_id: int):
     return ticket, None
  
  
-
-# CSS-23 · List tickets (HTML views)
-
-@tickets_bp.get("/tickets")
-@login_required
-def list_tickets():
-    # customers don't belong here — they have their own /tickets/my view
-    if current_user.role == Role.CUSTOMER:
-        abort(403)
-    tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
-    return render_template("tickets/tickets.html", tickets=tickets, view="all")
-
-
-@tickets_bp.get("/tickets/my")
-@login_required
-def my_tickets():
-    # only the current user's tickets, newest first
-    tickets = (Ticket.query
-               .filter_by(customer_id=current_user.id)
-               .order_by(Ticket.created_at.desc())
-               .all())
-    return render_template("tickets/tickets.html", tickets=tickets, view="my")
-
 
 # CSS-22 · Create ticket
  
