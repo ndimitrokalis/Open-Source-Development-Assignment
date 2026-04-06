@@ -41,7 +41,7 @@ def _get_ticket_or_404(ticket_id: int):
  
  
 
-# CSS-22 · Create ticket   
+# CSS-22 · Create ticket
  
 @tickets_bp.post("/tickets")
 @login_required

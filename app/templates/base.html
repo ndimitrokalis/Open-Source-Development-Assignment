@@ -30,7 +30,8 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
 
-      <a class="navbar-brand fw-bold" href="{{ url_for('auth.login') }}">
+      {# brand goes to dashboard when logged in, login page when not #}
+      <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('auth.login') }}">
         <i class="bi bi-headset me-1"></i>LibreHelp
       </a>
 
@@ -55,7 +56,7 @@
           {# customers only see their own tickets #}
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'tickets.my_tickets' %}active{% endif %}"
-               href="#">{# TODO: url_for('tickets.my_tickets') after CSS-23 #}
+               href="#">{# waiting for Joanna to add GET /tickets/my route #}
               <i class="bi bi-ticket-perforated me-1"></i>My Tickets
             </a>
           </li>
@@ -70,7 +71,7 @@
           {# technician/manager/admin see everything #}
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'tickets.list_tickets' %}active{% endif %}"
-               href="#">{# TODO: url_for('tickets.list_tickets') after CSS-23 #}
+               href="#">{# waiting for Joanna to add GET /tickets route #}
               <i class="bi bi-list-task me-1"></i>All Tickets
             </a>
           </li>
@@ -112,7 +113,7 @@
 
           <li class="nav-item me-lg-2">
             <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
-               href="#">{# TODO: url_for('dashboard.index') once built #}
+               href="{{ url_for('dashboard.index') }}">
               <i class="bi bi-speedometer2 me-1"></i>Dashboard
             </a>
           </li>
@@ -198,7 +199,7 @@
 
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmswFBJCy/Dy78yNTyMqGv2Kqxp"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"
   ></script>
 

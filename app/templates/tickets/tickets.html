@@ -1,0 +1,104 @@
+{# =============================================================================
+   Author: G. Maistrelis
+   Date: 2026-04-05
+   Description: Ticket list view — renders all tickets (staff) or the current
+                user's own tickets (customer), depending on the `view` variable.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}{{ "My Tickets" if view == "my" else "All Tickets" }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="bi bi-list-task me-2"></i>
+    {{ "My Tickets" if view == "my" else "All Tickets" }}
+  </h2>
+  {# placeholder until CSS-31 #}
+  <a href="#" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>New Ticket
+  </a>
+</div>
+
+{% if tickets %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white rounded shadow-sm">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Priority</th>
+        {% if view == "all" %}
+        <th>Submitted by</th>
+        <th>Assignee</th>
+        {% endif %}
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ticket in tickets %}
+      <tr>
+        <td class="text-muted small">{{ ticket.id }}</td>
+
+        <td>
+          {# will link to ticket detail once CSS-33 is done #}
+          <a href="#" class="text-decoration-none fw-semibold text-dark">
+            {{ ticket.title }}
+          </a>
+        </td>
+
+        <td>
+          <span class="badge
+            {% if ticket.type == 'Critical' %}bg-danger
+            {% elif ticket.type == 'Bug' %}bg-warning text-dark
+            {% else %}bg-info text-dark{% endif %}">
+            {{ ticket.type }}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge
+            {% if ticket.status == 'Done' %}bg-success
+            {% elif ticket.status == 'In Progress' %}bg-primary
+            {% else %}bg-secondary{% endif %}">
+            {{ ticket.status }}
+          </span>
+        </td>
+
+        <td>
+          {% if ticket.priority %}
+          <span class="badge bg-danger">High</span>
+          {% else %}
+          <span class="text-muted small">Normal</span>
+          {% endif %}
+        </td>
+
+        {% if view == "all" %}
+        <td class="small">{{ ticket.customer_name }}</td>
+        <td class="small">{{ ticket.assignee.username if ticket.assignee else "—" }}</td>
+        {% endif %}
+
+        <td class="text-muted small">
+          {{ ticket.created_at.strftime("%d %b %Y") if ticket.created_at else "—" }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+  <p class="mb-1">No tickets yet.</p>
+  {% if view == "my" %}
+  <p class="small">When you submit a ticket it will appear here.</p>
+  {% else %}
+  <p class="small">No tickets have been submitted yet.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
