@@ -43,7 +43,7 @@ def index():
     # ── Employees (manager / admin only) ──────────────────────────────────────
     # TODO: extend once employee-specific fields are added to User model
     if current_user.role in ("manager", "admin"):
-        employees = User.query.filter(User.role == "technician").all()
+        employees = User.query.all()
     else:
         employees = []
 

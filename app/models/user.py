@@ -14,10 +14,6 @@ class Role:
     _LEVEL = {CUSTOMER: 0, TECHNICIAN: 1, MANAGER: 2, ADMIN: 3}
 
     @classmethod
-    def is_valid(cls, role):
-        return role in cls.ALL
-
-    @classmethod
     def has_permission(cls, user_role, required_role):
         return cls._LEVEL.get(user_role, -1) >= cls._LEVEL.get(required_role, 999)
 
