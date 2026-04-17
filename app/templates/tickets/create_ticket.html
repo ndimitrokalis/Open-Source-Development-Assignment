@@ -1,0 +1,160 @@
+{# =============================================================================
+   Author: A. Tzavara
+   Description: New ticket creation form.
+                Submits to POST /tickets via fetch (JSON).
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}New Ticket{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_ticket.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{# ── Breadcrumb ─────────────────────────────────────────────────────────────── #}
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    </li>
+    {% if current_user.role == 'customer' %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('tickets.my_tickets') }}">My Tickets</a>
+    </li>
+    {% else %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('tickets.list_tickets') }}">All Tickets</a>
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active" aria-current="page">New Ticket</li>
+  </ol>
+</nav>
+
+{# ── Form card ──────────────────────────────────────────────────────────────── #}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+
+    <div class="card border-0 shadow-sm">
+
+      <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">
+          <i class="bi bi-plus-circle me-2"></i>Open New Ticket
+        </h5>
+      </div>
+
+      <div class="card-body p-4">
+
+        {# Alert box — shown on success or error #}
+        <div id="alert-box" class="alert d-none" role="alert"></div>
+
+        <form id="create-form" novalidate>
+
+          {# ── Title ───────────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold">
+              Title <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              placeholder="Brief summary of the issue"
+              maxlength="200"
+              required
+            >
+            <div class="form-text text-end">
+              <span id="title-count">0</span>/200
+            </div>
+          </div>
+
+          {# ── Type + Priority ──────────────────────────────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-sm-7">
+              <label for="type" class="form-label fw-semibold">
+                Type <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="type" required>
+                <option value="Service" selected>Service</option>
+                <option value="Bug">Bug</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+            <div class="col-sm-5 d-flex align-items-end">
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="priority" role="switch">
+                <label class="form-check-label fw-semibold" for="priority">
+                  <i class="bi bi-exclamation-triangle text-danger me-1"></i>High Priority
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {# ── Description ──────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="description" class="form-label fw-semibold">Description</label>
+            <textarea
+              class="form-control"
+              id="description"
+              rows="5"
+              placeholder="Describe the issue in as much detail as possible…"
+            ></textarea>
+          </div>
+
+          {# ── Company + Due Date ───────────────────────────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="company" class="form-label fw-semibold">Company</label>
+              <input
+                type="text"
+                class="form-control"
+                id="company"
+                placeholder="Your company (optional)"
+                value="{{ current_user.company or '' }}"
+              >
+            </div>
+            <div class="col-sm-6">
+              <label for="done_by" class="form-label fw-semibold">Due Date</label>
+              <input type="date" class="form-control" id="done_by">
+            </div>
+          </div>
+
+          {# ── Attachments ──────────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="attachments" class="form-label fw-semibold">Attachments</label>
+            <input type="file" class="form-control" id="attachments" multiple>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              Select files to attach — filenames are saved with the ticket.
+            </div>
+            {# Preview of selected filenames #}
+            <div id="file-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+          </div>
+
+          {# ── Submit / Cancel ──────────────────────────────────────────────── #}
+          <div class="d-flex gap-2 pt-1">
+            <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+              <span id="btn-text">
+                <i class="bi bi-send me-1"></i>Submit Ticket
+              </span>
+              <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status" aria-hidden="true"></span>
+            </button>
+            <a
+              href="{{ url_for('tickets.my_tickets') if current_user.role == 'customer' else url_for('tickets.list_tickets') }}"
+              class="btn btn-outline-secondary"
+            >Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/create_ticket.js') }}"></script>
+{% endblock %}
