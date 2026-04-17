@@ -1,0 +1,192 @@
+{# =============================================================================
+   Author: G. Maistrelis
+   Date: 2026-04-17
+   Description: Ticket detail page — shows full ticket info, metadata, and
+                the comment thread. Staff see all fields; customers see their own.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+
+{# back link #}
+<a href="{{ url_for('tickets.my_tickets') if current_user.role == 'customer' else url_for('tickets.list_tickets') }}"
+   class="btn btn-outline-secondary btn-sm mb-4">
+  <i class="bi bi-arrow-left me-1"></i>Back to tickets
+</a>
+
+<div class="row g-4">
+
+  {# left column — main ticket info #}
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <span class="badge
+            {% if ticket.status == 'Done' %}bg-success
+            {% elif ticket.status == 'In Progress' %}bg-primary
+            {% else %}bg-secondary{% endif %}">
+            {{ ticket.status }}
+          </span>
+          <span class="badge
+            {% if ticket.type == 'Critical' %}bg-danger
+            {% elif ticket.type == 'Bug' %}bg-warning text-dark
+            {% else %}bg-info text-dark{% endif %}">
+            {{ ticket.type }}
+          </span>
+          {% if ticket.priority %}
+          <span class="badge bg-danger">High Priority</span>
+          {% endif %}
+        </div>
+
+        <h3 class="fw-bold mb-3">{{ ticket.title }}</h3>
+
+        {% if ticket.description %}
+        <p class="text-muted">{{ ticket.description }}</p>
+        {% else %}
+        <p class="text-muted fst-italic">No description provided.</p>
+        {% endif %}
+
+      </div>
+    </div>
+
+    {# comments #}
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-chat-left-text me-2"></i>Comments ({{ comments | length }})
+      </div>
+      <div class="card-body">
+
+        {% if comments %}
+        {% for comment in comments %}
+        <div class="d-flex gap-3 mb-3">
+          <div class="flex-shrink-0">
+            <span class="avatar-circle">{{ comment.author.username[0] | upper }}</span>
+          </div>
+          <div>
+            <div class="fw-semibold small">{{ comment.author.username }}
+              <span class="text-muted fw-normal ms-2">
+                {{ comment.created_at.strftime("%d %b %Y, %H:%M") if comment.created_at else "" }}
+              </span>
+            </div>
+            <p class="mb-0">{{ comment.body }}</p>
+          </div>
+        </div>
+        {% if not loop.last %}<hr class="my-2">{% endif %}
+        {% endfor %}
+        {% else %}
+        <p class="text-muted small mb-3">No comments yet.</p>
+        {% endif %}
+
+        {# add comment form #}
+        <hr>
+        <form id="comment-form" class="mt-3">
+          <div class="mb-2">
+            <textarea id="comment-body" class="form-control" rows="3"
+                      placeholder="Add a comment..." maxlength="5000"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-send me-1"></i>Post comment
+          </button>
+          <span id="comment-feedback" class="ms-2 small"></span>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  {# right column — metadata #}
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-info-circle me-2"></i>Details
+      </div>
+      <ul class="list-group list-group-flush small">
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Ticket #</span>
+          <span>{{ ticket.id }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Submitted by</span>
+          <span>{{ ticket.customer_name }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Assignee</span>
+          <span>{{ ticket.assignee.username if ticket.assignee else "Unassigned" }}</span>
+        </li>
+        {% if ticket.company %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Company</span>
+          <span>{{ ticket.company }}</span>
+        </li>
+        {% endif %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Created</span>
+          <span>{{ ticket.created_at.strftime("%d %b %Y") if ticket.created_at else "—" }}</span>
+        </li>
+        {% if ticket.done_by %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Due by</span>
+          <span>{{ ticket.done_by.strftime("%d %b %Y") }}</span>
+        </li>
+        {% endif %}
+        {% if ticket.closed_at %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">Closed</span>
+          <span>{{ ticket.closed_at.strftime("%d %b %Y") }}</span>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .avatar-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #6c757d;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('comment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const body = document.getElementById('comment-body').value.trim();
+    const feedback = document.getElementById('comment-feedback');
+    if (!body) return;
+
+    fetch('/tickets/{{ ticket.id }}/comments', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ body: body })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        feedback.textContent = data.error;
+        feedback.className = 'ms-2 small text-danger';
+      } else {
+        // reload to show the new comment
+        location.reload();
+      }
+    });
+  });
+</script>
+{% endblock %}
