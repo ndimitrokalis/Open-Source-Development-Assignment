@@ -56,7 +56,7 @@
           {# customers only see their own tickets #}
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'tickets.my_tickets' %}active{% endif %}"
-               href="#">{# waiting for Joanna to add GET /tickets/my route #}
+               href="{{ url_for('tickets.my_tickets') }}">
               <i class="bi bi-ticket-perforated me-1"></i>My Tickets
             </a>
           </li>
@@ -71,7 +71,7 @@
           {# technician/manager/admin see everything #}
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'tickets.list_tickets' %}active{% endif %}"
-               href="#">{# waiting for Joanna to add GET /tickets route #}
+               href="{{ url_for('tickets.list_tickets') }}">
               <i class="bi bi-list-task me-1"></i>All Tickets
             </a>
           </li>
