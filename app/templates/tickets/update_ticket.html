@@ -1,0 +1,333 @@
+{# =============================================================================
+   Author: A. Tzavara
+   Description: Ticket detail page.
+                Shows all ticket info (read-only) + comment thread.
+                "Update" = posting a comment only — core ticket fields
+                cannot be changed here by anyone.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/update_ticket.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{# Hidden field — lets JS read the ticket ID without hard-coding it #}
+<div id="ticket-container" data-ticket-id="{{ ticket.id }}"></div>
+
+{# ── Breadcrumb ─────────────────────────────────────────────────────────────── #}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    </li>
+    {% if current_user.role == 'customer' %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('tickets.my_tickets') }}">My Tickets</a>
+    </li>
+    {% else %}
+    <li class="breadcrumb-item">
+      <a href="{{ url_for('tickets.list_tickets') }}">All Tickets</a>
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active" aria-current="page">Ticket #{{ ticket.id }}</li>
+  </ol>
+</nav>
+
+{# ── Global alert box ───────────────────────────────────────────────────────── #}
+<div id="alert-box" class="alert d-none mb-3" role="alert"></div>
+
+{# ── Ticket header ──────────────────────────────────────────────────────────── #}
+<div class="mb-4">
+  <h3 class="mb-2 fw-bold">{{ ticket.title }}</h3>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <span class="badge bg-secondary">#{{ ticket.id }}</span>
+
+    {# Status #}
+    {% if ticket.status == 'Done' %}
+      <span class="badge bg-success">
+        <i class="bi bi-check-circle-fill me-1"></i>{{ ticket.status }}
+      </span>
+    {% elif ticket.status == 'In Progress' %}
+      <span class="badge bg-primary">
+        <i class="bi bi-arrow-repeat me-1"></i>{{ ticket.status }}
+      </span>
+    {% else %}
+      <span class="badge bg-secondary">
+        <i class="bi bi-clock me-1"></i>{{ ticket.status }}
+      </span>
+    {% endif %}
+
+    {# Type #}
+    {% if ticket.type == 'Critical' %}
+      <span class="badge bg-danger">{{ ticket.type }}</span>
+    {% elif ticket.type == 'Bug' %}
+      <span class="badge bg-warning text-dark">{{ ticket.type }}</span>
+    {% else %}
+      <span class="badge bg-info text-dark">{{ ticket.type }}</span>
+    {% endif %}
+
+    {# Priority #}
+    {% if ticket.priority %}
+      <span class="badge bg-danger">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>High Priority
+      </span>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Two-column layout ──────────────────────────────────────────────────────── #}
+<div class="row g-4">
+
+  {# ━━━━━━━━━━━━━━━━━━━━━━━━ LEFT COLUMN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #}
+  <div class="col-lg-8">
+
+    {# ── Description ─────────────────────────────────────────────────────── #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-file-text me-2 text-muted"></i>Description
+      </div>
+      <div class="card-body">
+        {% if ticket.description %}
+          <p class="mb-0 ticket-description">{{ ticket.description }}</p>
+        {% else %}
+          <p class="mb-0 text-muted fst-italic">No description provided.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Attachments (only if there are any) ──────────────────────────────── #}
+    {% if ticket.attachments %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-paperclip me-2 text-muted"></i>Attachments
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% for att in ticket.attachments.split(',') %}
+            {% if att.strip() %}
+            <span class="attachment-chip">
+              <i class="bi bi-file-earmark me-1"></i>{{ att.strip() }}
+            </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Comment thread ───────────────────────────────────────────────────── #}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom fw-semibold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-chat-left-text me-2 text-muted"></i>Comments</span>
+        <span class="badge bg-secondary rounded-pill">{{ ticket.replies.count() }}</span>
+      </div>
+      <div class="card-body" id="comments-area">
+
+        {% set replies_list = ticket.replies.all() %}
+        {% if replies_list %}
+          <div class="comment-thread">
+            {% for reply in replies_list %}
+            <div class="comment-card" id="comment-{{ reply.id }}">
+
+              {# Avatar — colour based on role #}
+              <div class="comment-avatar ca-{{ reply.author.role if reply.author else 'customer' }}">
+                {{ reply.author.username[0]|upper if reply.author else '?' }}
+              </div>
+
+              {# Bubble #}
+              <div class="comment-bubble {% if reply.author_id == current_user.id %}comment-own{% endif %}">
+                <div class="comment-meta">
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="comment-author">
+                      {{ reply.author.username if reply.author else 'Unknown' }}
+                    </span>
+                    <span class="badge badge-role-{{ reply.author.role if reply.author else '' }} rounded-pill"
+                          style="font-size:.65rem;">
+                      {{ reply.author.role|capitalize if reply.author else '' }}
+                    </span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="comment-time">
+                      {{ reply.created_at.strftime('%d %b %Y, %H:%M') if reply.created_at else '' }}
+                    </span>
+                    {# Delete button — only for the author or managers/admins #}
+                    {% if reply.author_id == current_user.id or current_user.role in ['manager', 'admin'] %}
+                    <button
+                      class="btn-del-comment"
+                      onclick="deleteComment({{ reply.id }})"
+                      title="Delete comment"
+                      aria-label="Delete comment"
+                    ><i class="bi bi-x-lg"></i></button>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="comment-body">{{ reply.body }}</div>
+              </div>
+
+            </div>
+            {% endfor %}
+          </div>
+
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-chat d-block fs-2 mb-2 opacity-25"></i>
+            No comments yet. Be the first to reply.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    {# ── Add comment ──────────────────────────────────────────────────────── #}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-reply me-2 text-muted"></i>Add Comment
+      </div>
+      <div class="card-body">
+        <form id="comment-form" novalidate>
+          <div class="mb-3">
+            <textarea
+              class="form-control"
+              id="comment-body"
+              rows="4"
+              placeholder="Write your reply…"
+              maxlength="5000"
+            ></textarea>
+            <div class="d-flex justify-content-end mt-1">
+              <span class="form-text"><span id="char-count">0</span>/5000</span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="comment-btn">
+            <span id="comment-btn-text">
+              <i class="bi bi-send me-1"></i>Post Comment
+            </span>
+            <span class="spinner-border spinner-border-sm d-none" id="comment-spinner" role="status" aria-hidden="true"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  {# ━━━━━━━━━━━━━━━━━━━━━━━━ RIGHT SIDEBAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #}
+  <div class="col-lg-4">
+
+    {# ── Ticket metadata ──────────────────────────────────────────────────── #}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-info-circle me-2 text-muted"></i>Details
+      </div>
+      <div class="card-body p-0">
+        <dl class="ticket-meta mb-0">
+
+          <div class="meta-row">
+            <dt>Submitted by</dt>
+            <dd>
+              <i class="bi bi-person me-1 text-muted"></i>{{ ticket.customer_name }}
+            </dd>
+          </div>
+
+          <div class="meta-row">
+            <dt>Company</dt>
+            <dd>{{ ticket.company or '—' }}</dd>
+          </div>
+
+          <div class="meta-row">
+            <dt>Assignee</dt>
+            <dd>
+              {% if ticket.assignee %}
+                <span class="d-flex align-items-center gap-1">
+                  <i class="bi bi-person-fill text-info"></i>
+                  {{ ticket.assignee.username }}
+                </span>
+              {% else %}
+                <span class="text-muted fst-italic">Unassigned</span>
+              {% endif %}
+            </dd>
+          </div>
+
+          <div class="meta-row">
+            <dt>Created</dt>
+            <dd>{{ ticket.created_at.strftime('%d %b %Y') if ticket.created_at else '—' }}</dd>
+          </div>
+
+          <div class="meta-row">
+            <dt>Due Date</dt>
+            <dd>{{ ticket.done_by.strftime('%d %b %Y') if ticket.done_by else '—' }}</dd>
+          </div>
+
+          {% if ticket.closed_at %}
+          <div class="meta-row">
+            <dt>Closed</dt>
+            <dd class="text-success">
+              <i class="bi bi-check-circle-fill me-1"></i>
+              {{ ticket.closed_at.strftime('%d %b %Y') }}
+            </dd>
+          </div>
+          {% endif %}
+
+        </dl>
+      </div>
+    </div>
+
+    {# ── Assign technician (manager / admin only) ──────────────────────────── #}
+    {% if current_user.role in ['manager', 'admin'] %}
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-person-plus me-2 text-muted"></i>Assign Technician
+      </div>
+      <div class="card-body">
+        <form id="assign-form">
+          <div class="mb-3">
+            <select class="form-select form-select-sm" id="assignee-select">
+              <option value="">— Unassign —</option>
+              {% for tech in technicians %}
+              <option value="{{ tech.id }}"
+                {% if ticket.assignee_id == tech.id %}selected{% endif %}>
+                {{ tech.username }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+            <i class="bi bi-person-check me-1"></i>
+            {{ 'Reassign' if ticket.assignee_id else 'Assign' }}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Actions (staff only) ─────────────────────────────────────────────── #}
+    {% if current_user.role != 'customer' %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-lightning me-2 text-muted"></i>Actions
+      </div>
+      <div class="card-body d-grid gap-2">
+        {% if ticket.status != 'Done' %}
+          <button class="btn btn-outline-success btn-sm" id="close-btn">
+            <i class="bi bi-check-circle me-1"></i>Close Ticket
+          </button>
+        {% else %}
+          <p class="text-success text-center small mb-0">
+            <i class="bi bi-check-circle-fill me-1"></i>This ticket is closed.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/update_ticket.js') }}"></script>
+{% endblock %}

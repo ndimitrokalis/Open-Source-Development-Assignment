@@ -1,0 +1,171 @@
+/* =============================================================================
+   update_ticket.css — styles for the ticket detail / comment page.
+   Page extends base.html (Bootstrap 5.3 + Bootstrap Icons already loaded).
+   ============================================================================= */
+
+/* ── Ticket description ──────────────────────────────────────────────────────── */
+
+/* Preserve line-breaks typed in the description textarea */
+.ticket-description {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: #343a40;
+}
+
+/* ── Attachment chips ────────────────────────────────────────────────────────── */
+
+/* Read-only chip showing an attached filename */
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  color: #495057;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+/* ── Comment thread ──────────────────────────────────────────────────────────── */
+
+.comment-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.comment-card {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+}
+
+/* Avatar circle — colour driven by the author's role class */
+.comment-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+.ca-customer   { background: #6366f1; }
+.ca-technician { background: #0891b2; }
+.ca-manager    { background: #d97706; }
+.ca-admin      { background: #dc2626; }
+
+/* Comment bubble */
+.comment-bubble {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 0 12px 12px 12px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 0, 0, .07);
+  min-width: 0; /* prevents overflow inside a flex child */
+}
+
+/* Own comment — subtle indigo tint */
+.comment-own {
+  background: #eef2ff;
+  border-color: rgba(99, 102, 241, .25);
+}
+
+/* Header row inside each bubble */
+.comment-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #212529;
+}
+
+.comment-time {
+  font-size: 0.72rem;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.comment-body {
+  font-size: 0.9rem;
+  color: #343a40;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Role badge colours inside comments */
+.badge-role-customer   { background: #6366f1 !important; color: #fff !important; }
+.badge-role-technician { background: #0891b2 !important; color: #fff !important; }
+.badge-role-manager    { background: #d97706 !important; color: #fff !important; }
+.badge-role-admin      { background: #dc2626 !important; color: #fff !important; }
+
+/* Delete (×) button on each comment */
+.btn-del-comment {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  line-height: 1;
+  color: #adb5bd;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color .15s;
+}
+.btn-del-comment:hover { color: #dc3545; }
+
+/* ── Ticket metadata sidebar ─────────────────────────────────────────────────── */
+
+.ticket-meta .meta-row {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0.5rem 1rem;
+}
+
+.ticket-meta .meta-row:last-child {
+  border-bottom: none;
+}
+
+.ticket-meta dt {
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #6c757d;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
+}
+
+.ticket-meta dd {
+  font-size: 0.875rem;
+  color: #212529;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  gap: 4px;
+}
+
+/* ── Card header ─────────────────────────────────────────────────────────────── */
+
+.card-header {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
