@@ -1,2 +1,10 @@
 venv
 __pycache__
+instance/
+
+# AI tool context — never commit these
+CLAUDE.md
+JOURNAL.md
+.claude/
+.claude_files/
+*.claude

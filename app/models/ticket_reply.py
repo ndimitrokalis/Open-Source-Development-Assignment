@@ -1,6 +1,6 @@
 """
-TicketReply — one row per comment left on a ticket.
-Any authenticated user who can see the ticket can comment on it.
+TicketReply — one comment per row on a ticket.
+Any authenticated user who can see the ticket can leave a comment.
 """
 
 from datetime import datetime, timezone
