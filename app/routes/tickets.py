@@ -74,8 +74,26 @@ def ticket_detail(ticket_id: int):
     # customers can only view their own tickets
     if current_user.role == Role.CUSTOMER and ticket.customer_id != current_user.id:
         abort(403)
-    comments = ticket.replies.all()
-    return render_template("tickets/ticket_detail.html", ticket=ticket, comments=comments)
+    # technicians list needed for the assign dropdown (manager/admin only)
+    from ..models.user import User
+    technicians = (
+        User.query.filter_by(role=Role.TECHNICIAN, active=True).all()
+        if Role.has_permission(current_user.role, Role.MANAGER)
+        else []
+    )
+    return render_template(
+        "tickets/update_ticket.html",
+        ticket=ticket,
+        technicians=technicians,
+    )
+
+
+# Page route — create ticket form
+
+@tickets_bp.get("/tickets/new")
+@login_required
+def create_ticket_page():
+    return render_template("tickets/create_ticket.html")
 
 
 # CSS-22 · Create ticket

@@ -61,8 +61,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'tickets.create_ticket' %}active{% endif %}"
-               href="#">{# TODO: url_for('tickets.create_ticket') after CSS-31 #}
+            <a class="nav-link {% if request.endpoint == 'tickets.create_ticket_page' %}active{% endif %}"
+               href="{{ url_for('tickets.create_ticket_page') }}">
               <i class="bi bi-plus-circle me-1"></i>New Ticket
             </a>
           </li>

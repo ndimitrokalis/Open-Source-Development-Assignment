@@ -13,25 +13,6 @@
 
 {% block content %}
 
-{# ── Breadcrumb ─────────────────────────────────────────────────────────────── #}
-<nav aria-label="breadcrumb" class="mb-4">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item">
-      <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
-    </li>
-    {% if current_user.role == 'customer' %}
-    <li class="breadcrumb-item">
-      <a href="{{ url_for('tickets.my_tickets') }}">My Tickets</a>
-    </li>
-    {% else %}
-    <li class="breadcrumb-item">
-      <a href="{{ url_for('tickets.list_tickets') }}">All Tickets</a>
-    </li>
-    {% endif %}
-    <li class="breadcrumb-item active" aria-current="page">New Ticket</li>
-  </ol>
-</nav>
-
 {# ── Form card ──────────────────────────────────────────────────────────────── #}
 <div class="row justify-content-center">
   <div class="col-lg-8 col-xl-7">
