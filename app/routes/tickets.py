@@ -63,7 +63,22 @@ def my_tickets():
     return render_template("tickets/tickets.html", tickets=tickets, view="my")
 
 
-# CSS-22  Create ticket   
+# CSS-32 · Ticket detail page
+
+@tickets_bp.get("/tickets/<int:ticket_id>")
+@login_required
+def ticket_detail(ticket_id: int):
+    ticket, err = _get_ticket_or_404(ticket_id)
+    if err:
+        return err
+    # customers can only view their own tickets
+    if current_user.role == Role.CUSTOMER and ticket.customer_id != current_user.id:
+        abort(403)
+    comments = ticket.replies.all()
+    return render_template("tickets/ticket_detail.html", ticket=ticket, comments=comments)
+
+
+# CSS-22 · Create ticket
 
 @tickets_bp.post("/tickets")
 @login_required
