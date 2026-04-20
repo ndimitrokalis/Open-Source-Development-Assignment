@@ -1,5 +1,5 @@
 """
-Ticket model 
+Ticket model
 CSS-22 (create), CSS-24 (update), CSS-25 (assign), CSS-26 (close).
 """
 
@@ -43,12 +43,10 @@ class Ticket(db.Model):
     # True = High priority, False = Normal
     priority    = db.Column(db.Boolean, nullable=False, default=False)
 
-    # Company associated with the ticket — copied from the customer's profile at
-    # creation time so it stays accurate even if they later change their company.
+    # Company — copied from the customer's profile at creation time
     company     = db.Column(db.String(120), nullable=True)
 
-    # Comma-separated list of filenames, e.g. "screenshot.png,report.pdf"
-    # Empty string or NULL means no attachments.
+    # Attachments — e.g. "file1.png,report.pdf"
     attachments = db.Column(db.Text, nullable=True)
 
     # Who opened the ticket
@@ -60,12 +58,13 @@ class Ticket(db.Model):
     created_at  = db.Column(db.DateTime, nullable=False,
                             default=lambda: datetime.now(timezone.utc))
 
-    # Due date — set when creating/updating
+    # Target completion date
     done_by     = db.Column(db.DateTime, nullable=True)
 
     # Filled in when status transitions to Done (CSS-26)
     closed_at   = db.Column(db.DateTime, nullable=True)
 
+    # Explicit foreign_keys because two FKs point at the same table
     customer = db.relationship(
         "User",
         foreign_keys=[customer_id],
@@ -77,7 +76,7 @@ class Ticket(db.Model):
         backref=db.backref("tickets_assigned", lazy="dynamic"),
     )
 
-    # One ticket → many comments, oldest first
+
     replies = db.relationship(
         "TicketReply",
         backref="ticket",
@@ -108,7 +107,7 @@ class Ticket(db.Model):
             "status":      self.status,
             "priority":    self.priority,
             "company":     self.company,
-            # Return as a list; empty list when no attachments
+            # Return attachments as a list; empty list when none
             "attachments": self.attachments.split(",") if self.attachments else [],
             "customer": {
                 "id":       self.customer_id,
