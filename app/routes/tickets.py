@@ -49,7 +49,7 @@ def list_tickets():
     if current_user.role == Role.CUSTOMER:
         abort(403)
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
-    return render_template("tickets/tickets.html", tickets=tickets, view="all")
+    return render_template("tickets/list_tickets.html", tickets=tickets, view="all")
 
 
 @tickets_bp.get("/tickets/my")
@@ -60,7 +60,7 @@ def my_tickets():
                .filter_by(customer_id=current_user.id)
                .order_by(Ticket.created_at.desc())
                .all())
-    return render_template("tickets/tickets.html", tickets=tickets, view="my")
+    return render_template("tickets/list_tickets.html", tickets=tickets, view="my")
 
 
 # CSS-32 · Ticket detail page
