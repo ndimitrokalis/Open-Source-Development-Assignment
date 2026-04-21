@@ -78,8 +78,8 @@
           {% endif %}
 
           <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'knowledgebase.articles' %}active{% endif %}"
-               href="#">{# TODO: url_for('knowledgebase.articles') once that blueprint is built #}
+            <a class="nav-link {% if request.endpoint in ['knowledgebase.list_articles', 'knowledgebase.new_article'] %}active{% endif %}"
+               href="{{ url_for('knowledgebase.list_articles') }}">
               <i class="bi bi-journal-text me-1"></i>Articles
             </a>
           </li>

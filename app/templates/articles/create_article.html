@@ -1,0 +1,98 @@
+{# =============================================================================
+   Author: G. Maistrelis
+   Date: 2026-04-21
+   Description: Create article form — staff only. Submits via JSON API to
+                POST /articles, then redirects to the article list on success.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}New Article{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="d-flex align-items-center mb-4">
+      <a href="{{ url_for('knowledgebase.list_articles') }}"
+         class="btn btn-outline-secondary btn-sm me-3">
+        <i class="bi bi-arrow-left me-1"></i>Back
+      </a>
+      <h2 class="mb-0">New Article</h2>
+    </div>
+
+    <div id="alert-box"></div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form id="article-form">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+            <input type="text" id="title" class="form-control"
+                   placeholder="Article title" maxlength="200" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
+            <select id="type" class="form-select" required>
+              <option value="">Select a type</option>
+              {% for t in types %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
+            <textarea id="content" class="form-control" rows="10"
+                      placeholder="Write the article content here..." required></textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" id="submit-btn">
+              <i class="bi bi-check-circle me-1"></i>Publish Article
+            </button>
+            <a href="{{ url_for('knowledgebase.list_articles') }}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('article-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const alertBox = document.getElementById('alert-box');
+
+    btn.disabled = true;
+    btn.textContent = 'Publishing...';
+
+    fetch('/articles', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        title:   document.getElementById('title').value.trim(),
+        type:    document.getElementById('type').value,
+        content: document.getElementById('content').value.trim(),
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        alertBox.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Publish Article';
+      } else {
+        window.location.href = '/articles';
+      }
+    });
+  });
+</script>
+{% endblock %}
