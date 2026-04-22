@@ -1,0 +1,90 @@
+{# =============================================================================
+   Author: G. Maistrelis
+   Date: 2026-04-21
+   Description: Knowledge base article list — search, filter by type, and
+                link to individual articles. Staff see a "New Article" button.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}Articles{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="bi bi-journal-text me-2"></i>Knowledge Base
+  </h2>
+  {% if current_user.role != 'customer' %}
+  <a href="{{ url_for('knowledgebase.new_article') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>New Article
+  </a>
+  {% endif %}
+</div>
+
+{# search and filter bar #}
+<form method="GET" action="{{ url_for('knowledgebase.list_articles') }}" class="row g-2 mb-4">
+  <div class="col-md-7">
+    <input type="text" name="q" value="{{ q }}" class="form-control"
+           placeholder="Search articles...">
+  </div>
+  <div class="col-md-3">
+    <select name="type" class="form-select">
+      <option value="">All types</option>
+      {% for t in types %}
+      <option value="{{ t }}" {% if t == selected_type %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-outline-secondary w-100">
+      <i class="bi bi-search me-1"></i>Search
+    </button>
+  </div>
+</form>
+
+{% if articles %}
+<div class="row g-3">
+  {% for article in articles %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body d-flex flex-column">
+        <div class="mb-2">
+          <span class="badge bg-secondary">{{ article.type }}</span>
+        </div>
+        <h5 class="card-title fw-semibold">{{ article.title }}</h5>
+        <p class="card-text text-muted small flex-grow-1">
+          {{ article.content[:120] }}{% if article.content|length > 120 %}…{% endif %}
+        </p>
+        <div class="mt-3 d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            {{ article.author.username if article.author else "—" }} ·
+            {{ article.created_at.strftime("%d %b %Y") if article.created_at else "" }}
+          </small>
+          {# link placeholder until single article view is built #}
+          <a href="#" class="btn btn-outline-primary btn-sm">Read</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
+  {% if q or selected_type %}
+  <p class="mb-1">No articles match your search.</p>
+  <a href="{{ url_for('knowledgebase.list_articles') }}" class="btn btn-outline-secondary btn-sm mt-2">
+    Clear filters
+  </a>
+  {% else %}
+  <p class="mb-1">No articles yet.</p>
+  {% if current_user.role != 'customer' %}
+  <a href="{{ url_for('knowledgebase.new_article') }}" class="btn btn-primary btn-sm mt-2">
+    Create the first article
+  </a>
+  {% endif %}
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

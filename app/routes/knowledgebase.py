@@ -8,7 +8,7 @@ CSS-37  GET   /articles/<id>     — single article view
 CSS-38  GET   /articles?q=       — search articles (integrated into list)
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 
 from .. import db
@@ -119,20 +119,29 @@ def update_article(article_id: int):
     return jsonify({"message": "Article updated successfully.", "article": article.to_dict()}), 200
 
 
-# CSS-37 + CSS-38  List / search articles
+# CSS-37 + CSS-38  List / search articles — HTML page
 
 @knowledgebase_bp.get("/articles")
 @login_required
 def list_articles():
     q = request.args.get("q", "").strip()
+    article_type = request.args.get("type", "").strip()
     query = Article.query
     if q:
         like = f"%{q}%"
         query = query.filter(
             db.or_(Article.title.ilike(like), Article.content.ilike(like))
         )
+    if article_type and ArticleType.is_valid(article_type):
+        query = query.filter(Article.type == article_type)
     articles = query.order_by(Article.created_at.desc()).all()
-    return jsonify({"articles": [a.to_dict() for a in articles]}), 200
+    return render_template(
+        "articles/list_articles.html",
+        articles=articles,
+        q=q,
+        selected_type=article_type,
+        types=ArticleType.ALL,
+    )
 
 
 # CSS-37  Single article view
@@ -144,3 +153,14 @@ def get_article(article_id: int):
     if err:
         return err
     return jsonify({"article": article.to_dict()}), 200
+
+
+# Create article page (GET) — form lives here, POST goes to /articles JSON API
+
+@knowledgebase_bp.get("/articles/new")
+@login_required
+def new_article():
+    # only staff can create articles
+    if current_user.role == Role.CUSTOMER:
+        abort(403)
+    return render_template("articles/create_article.html", types=ArticleType.ALL)
