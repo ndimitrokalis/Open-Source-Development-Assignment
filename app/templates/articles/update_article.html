@@ -1,0 +1,142 @@
+{# =============================================================================
+   Author: A. Tzavara
+   Description: Edit an existing article.
+                Submits to PUT /articles/<id> via fetch (JSON).
+                Expects `article` passed from the route.
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}Edit Article #{{ article.id }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/update_article.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{# ── Form card ──────────────────────────────────────────────────────────────── #}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+
+    <div class="card border-0 shadow-sm">
+
+      <div class="card-header bg-dark text-white py-3 d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">
+          <i class="bi bi-pencil-square me-2"></i>Edit Article
+        </h5>
+        <span class="badge bg-secondary fs-6">#{{ article.id }}</span>
+      </div>
+
+      <div class="card-body p-4">
+
+        {# Alert box — shown on success or error #}
+        <div id="alert-box" class="alert d-none" role="alert"></div>
+
+        <form id="update-article-form" novalidate data-article-id="{{ article.id }}">
+
+          {# ── Title ───────────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold">
+              Title <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              placeholder="Article title"
+              maxlength="200"
+              value="{{ article.title }}"
+              required
+            >
+            <div class="form-text text-end">
+              <span id="title-count">{{ article.title | length }}</span>/200
+            </div>
+          </div>
+
+          {# ── Type ─────────────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="type" class="form-label fw-semibold">
+              Type <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="type" required>
+              <option value="Manual"          {% if article.type == 'Manual'          %}selected{% endif %}>Manual</option>
+              <option value="Tutorial"        {% if article.type == 'Tutorial'        %}selected{% endif %}>Tutorial</option>
+              <option value="Troubleshooting" {% if article.type == 'Troubleshooting' %}selected{% endif %}>Troubleshooting</option>
+              <option value="FAQ"             {% if article.type == 'FAQ'             %}selected{% endif %}>FAQ</option>
+              <option value="Security"        {% if article.type == 'Security'        %}selected{% endif %}>Security</option>
+            </select>
+          </div>
+
+          {# ── Content ──────────────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="content" class="form-label fw-semibold">
+              Content <span class="text-danger">*</span>
+            </label>
+            <textarea
+              class="form-control"
+              id="content"
+              rows="10"
+              required
+            >{{ article.content }}</textarea>
+          </div>
+
+          {# ── Existing attachments ──────────────────────────────────────────── #}
+          {% if article.attachments %}
+          <div class="mb-3">
+            <p class="form-label fw-semibold mb-2">Current Attachments</p>
+            <div class="d-flex flex-wrap gap-2">
+              {% for filename in article.attachments.split(',') %}
+              {% if filename.strip() %}
+              <span class="badge bg-light text-dark border">
+                <i class="bi bi-paperclip me-1"></i>{{ filename.strip() }}
+              </span>
+              {% endif %}
+              {% endfor %}
+            </div>
+            <div class="form-text">Uploading new files will replace the current attachments.</div>
+          </div>
+          {% endif %}
+
+          {# ── New attachments ───────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="attachments" class="form-label fw-semibold">
+              {{ 'Replace Attachments' if article.attachments else 'Attachments' }}
+            </label>
+            <input type="file" class="form-control" id="attachments" multiple>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              Select files to attach — filenames are saved with the article.
+            </div>
+            <div id="file-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+          </div>
+
+          {# ── Metadata ─────────────────────────────────────────────────────── #}
+          <div class="text-muted small mb-4">
+            <i class="bi bi-person me-1"></i>Author: {{ article.author.username }}
+            &nbsp;&bull;&nbsp;
+            <i class="bi bi-calendar me-1"></i>Created: {{ article.created_at.strftime('%d %b %Y') }}
+          </div>
+
+          {# ── Submit / Cancel ──────────────────────────────────────────────── #}
+          <div class="d-flex gap-2 pt-1">
+            <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+              <span id="btn-text">
+                <i class="bi bi-floppy me-1"></i>Save Changes
+              </span>
+              <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status" aria-hidden="true"></span>
+            </button>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/update_article.js') }}"></script>
+{% endblock %}
