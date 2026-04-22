@@ -1,0 +1,115 @@
+{# =============================================================================
+   Author: A. Tzavara
+   Description: New article creation form.
+                Submits to POST /articles via fetch (JSON).
+   ============================================================================= #}
+{% extends "base.html" %}
+
+{% block title %}New Article{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_article.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{# ── Form card ──────────────────────────────────────────────────────────────── #}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+
+    <div class="card border-0 shadow-sm">
+
+      <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">
+          <i class="bi bi-journal-plus me-2"></i>New Article
+        </h5>
+      </div>
+
+      <div class="card-body p-4">
+
+        {# Alert box — shown on success or error #}
+        <div id="alert-box" class="alert d-none" role="alert"></div>
+
+        <form id="create-article-form" novalidate>
+
+          {# ── Title ───────────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold">
+              Title <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              placeholder="Article title"
+              maxlength="200"
+              required
+            >
+            <div class="form-text text-end">
+              <span id="title-count">0</span>/200
+            </div>
+          </div>
+
+          {# ── Type ─────────────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="type" class="form-label fw-semibold">
+              Type <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="type" required>
+              <option value="" disabled selected>Select a type…</option>
+              <option value="Manual">Manual</option>
+              <option value="Tutorial">Tutorial</option>
+              <option value="Troubleshooting">Troubleshooting</option>
+              <option value="FAQ">FAQ</option>
+              <option value="Security">Security</option>
+            </select>
+          </div>
+
+          {# ── Content ──────────────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="content" class="form-label fw-semibold">
+              Content <span class="text-danger">*</span>
+            </label>
+            <textarea
+              class="form-control"
+              id="content"
+              rows="10"
+              placeholder="Write the article content here…"
+              required
+            ></textarea>
+          </div>
+
+          {# ── Attachments ──────────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label for="attachments" class="form-label fw-semibold">Attachments</label>
+            <input type="file" class="form-control" id="attachments" multiple>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              Select files to attach — filenames are saved with the article.
+            </div>
+            <div id="file-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+          </div>
+
+          {# ── Submit / Cancel ──────────────────────────────────────────────── #}
+          <div class="d-flex gap-2 pt-1">
+            <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+              <span id="btn-text">
+                <i class="bi bi-send me-1"></i>Publish Article
+              </span>
+              <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status" aria-hidden="true"></span>
+            </button>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/create_article.js') }}"></script>
+{% endblock %}
