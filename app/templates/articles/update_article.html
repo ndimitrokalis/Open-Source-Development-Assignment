@@ -22,7 +22,11 @@
 
       <div class="card-header bg-dark text-white py-3 d-flex align-items-center justify-content-between">
         <h5 class="mb-0">
+          {% if can_edit %}
           <i class="bi bi-pencil-square me-2"></i>Edit Article
+          {% else %}
+          <i class="bi bi-journal-text me-2"></i>{{ article.title }}
+          {% endif %}
         </h5>
         <span class="badge bg-secondary fs-6">#{{ article.id }}</span>
       </div>
@@ -47,6 +51,7 @@
               maxlength="200"
               value="{{ article.title }}"
               required
+              {% if not can_edit %}readonly{% endif %}
             >
             <div class="form-text text-end">
               <span id="title-count">{{ article.title | length }}</span>/200
@@ -58,7 +63,7 @@
             <label for="type" class="form-label fw-semibold">
               Type <span class="text-danger">*</span>
             </label>
-            <select class="form-select" id="type" required>
+            <select class="form-select" id="type" required {% if not can_edit %}disabled{% endif %}>
               <option value="Manual"          {% if article.type == 'Manual'          %}selected{% endif %}>Manual</option>
               <option value="Tutorial"        {% if article.type == 'Tutorial'        %}selected{% endif %}>Tutorial</option>
               <option value="Troubleshooting" {% if article.type == 'Troubleshooting' %}selected{% endif %}>Troubleshooting</option>
@@ -77,6 +82,7 @@
               id="content"
               rows="10"
               required
+              {% if not can_edit %}readonly{% endif %}
             >{{ article.content }}</textarea>
           </div>
 
@@ -98,6 +104,7 @@
           {% endif %}
 
           {# ── New attachments ───────────────────────────────────────────────── #}
+          {% if can_edit %}
           <div class="mb-4">
             <label for="attachments" class="form-label fw-semibold">
               {{ 'Replace Attachments' if article.attachments else 'Attachments' }}
@@ -109,6 +116,7 @@
             </div>
             <div id="file-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
           </div>
+          {% endif %}
 
           {# ── Metadata ─────────────────────────────────────────────────────── #}
           <div class="text-muted small mb-4">
@@ -119,13 +127,17 @@
 
           {# ── Submit / Cancel ──────────────────────────────────────────────── #}
           <div class="d-flex gap-2 pt-1">
+            {% if can_edit %}
             <button type="submit" class="btn btn-primary px-4" id="submit-btn">
               <span id="btn-text">
                 <i class="bi bi-floppy me-1"></i>Save Changes
               </span>
               <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status" aria-hidden="true"></span>
             </button>
-            <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">Cancel</a>
+            {% endif %}
+            <a href="{{ url_for('knowledgebase.list_articles') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i>Back to Articles
+            </a>
           </div>
 
         </form>
