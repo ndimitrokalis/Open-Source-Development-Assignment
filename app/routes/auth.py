@@ -68,7 +68,7 @@ def login():
     if not user.is_active:
         return jsonify({"error": "Account disabled. Contact an administrator."}), 403
 
-    #user.last_login = datetime.now(timezone.utc) #Disabled during testing to avoid merge conflicts with other branches
+    user.last_login = datetime.now(timezone.utc) #Disable during testing to avoid merge conflicts with other branches
     db.session.commit()
     login_user(user, remember=remember)
 

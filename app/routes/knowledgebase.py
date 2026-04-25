@@ -155,6 +155,27 @@ def get_article(article_id: int):
     return jsonify({"article": article.to_dict()}), 200
 
 
+# Article detail / edit page
+
+@knowledgebase_bp.get("/articles/<int:article_id>/edit")
+@login_required
+def edit_article(article_id: int):
+    article, err = _get_article_or_404(article_id)
+    if err:
+        return err
+
+    is_author = article.author_id == current_user.id
+    is_manager_or_above = Role.has_permission(current_user.role, Role.MANAGER)
+    can_edit = is_author or is_manager_or_above
+
+    return render_template(
+        "articles/update_article.html",
+        article=article,
+        types=ArticleType.ALL,
+        can_edit=can_edit,
+    )
+
+
 # Create article page (GET) — form lives here, POST goes to /articles JSON API
 
 @knowledgebase_bp.get("/articles/new")
