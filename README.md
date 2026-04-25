@@ -54,9 +54,9 @@ LibreHelp is built using the following technologies:
 
 ## 📸 Screenshots
 
-<div align="center">
-  <img src="https://github.com/ndimitrokalis/Open-Source-Development-Assignment/tree/main/app/static/images/preview.png" alt="Preview"height: auto;" />
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ndimitrokalis/Open-Source-Development-Assignment/main/app/static/images/preview.png" alt="Preview" />
+</p>
 
 ---
 
